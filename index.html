@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -113,6 +114,7 @@ window.sendProdeInvite = async (email) => {
   await setDoc(ref,{ name:groupName, members: arrayUnion(u.email, email), created:u.email },{merge:true});
   showToast('✉️ Invitación enviada a '+email);
 };
+
 </script>
 
 <style>
@@ -128,7 +130,7 @@ body{font-family:'Barlow',sans-serif;background:var(--sky);color:var(--dark);min
 .bg-c2{position:absolute;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,215,0,.12),transparent 70%);bottom:10%;left:-60px}
 
 /* ─ LOGIN ─ */
-#screen-login{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center}
+#screen-login{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center}
 .login-logo{font-size:64px;margin-bottom:12px;filter:drop-shadow(0 4px 20px rgba(0,0,0,.2));animation:fl 3s ease-in-out infinite}
 @keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .login-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(34px,9vw,52px);letter-spacing:.06em;color:#fff;line-height:1}
@@ -352,13 +354,14 @@ body{font-family:'Barlow',sans-serif;background:var(--sky);color:var(--dark);min
 }
 @media(max-width:400px){.fn2{font-size:11px}.mname{font-size:12px}}
 </style>
+
 </head>
 <body>
 <div class="bg"><div class="bg-s"></div><div class="bg-l"></div><div class="bg-26">26</div><div class="bg-c1"></div><div class="bg-c2"></div></div>
 <div class="toast" id="toast"></div>
 
 <!-- LOGIN -->
-<div id="screen-login" style="display:none">
+<div id="screen-login" style="display:flex">
   <div class="login-logo">🏆</div>
   <div class="login-title">FIFA WORLD CUP <span>2026</span></div>
   <div class="login-sub">Álbum Panini · Colección Digital</div>
@@ -492,7 +495,7 @@ body{font-family:'Barlow',sans-serif;background:var(--sky);color:var(--dark);min
   </div>
 </div>
 
-<script>
+<script type="module">
 /* ═══ DATA ═══ */
 window.COL={};window.RESULTS={};window.PRODE={};window.PRODE_GROUPS=[];
 
@@ -766,8 +769,8 @@ window.uS=function(){
   });
 };
 
-function setSort(s,btn){curSort=s;document.querySelectorAll('.srtb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rebuildAll();}
-function sF(f,btn){curFilter=f;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rebuildAll();}
+window.setSort = function(s,btn){curSort=s;document.querySelectorAll('.srtb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rebuildAll();}
+window.sF = function(f,btn){curFilter=f;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rebuildAll();}
 
 function buildAC(q){
   if(!q)return[];const ql=q.toLowerCase();const res=[];
@@ -781,7 +784,7 @@ function buildAC(q){
   });
   return res.slice(0,8);
 }
-function showAC(q){
+window.showAC = function(q){
   const drop=document.getElementById('acd');
   const items=buildAC(q);
   if(!items.length||!q){drop.classList.remove('show');drop.innerHTML='';drop._items=[];return;}
@@ -789,7 +792,7 @@ function showAC(q){
   drop.innerHTML=items.map((it,i)=>`<div class="aci${i===acIdx?' sel':''}" onmousedown="pickAC(${i})"><span class="acf">${it.flag}</span><span style="flex:1"><div class="acn">${it.name}</div><div class="acs">${it.sub}</div></span>${it.num?`<span class="acc">${it.num}</span>`:''}</div>`).join('');
   drop.classList.add('show');
 }
-function pickAC(i){
+window.pickAC = function(i){
   const drop=document.getElementById('acd');const it=(drop._items||[])[i];if(!it)return;
   document.getElementById('qi').value=it.type==='c'?it.name:it.num;
   drop.classList.remove('show');rebuildAll();
@@ -804,13 +807,13 @@ function rowHTML(key){
   if(v==='tengo')return`<span class="chip ct" onclick="setChip('${key}','f',event)">✓ Tengo</span><button class="ra" onclick="chRep('${key}',1,event)">+1</button>`;
   return`<span class="chip cf" onclick="setChip('${key}','tengo',event)">Me falta</span>`;
 }
-function setChip(key,val,e){
+window.setChip = function(key,val,e){
   e&&e.stopPropagation();
   if(val==='f'){delete window.COL[key];}else{window.COL[key]=val;}
   window.scheduleSave&&window.scheduleSave();window.uS();refreshRow(key);
   showToast(val==='tengo'?'✓ Marcada como tengo':'Desmarcada');
 }
-function chRep(key,delta,e){
+window.chRep = function(key,delta,e){
   e&&e.stopPropagation();
   const v=gs(key);const cur=isD(v)?v:v==='tengo'?1:0;const next=Math.max(0,cur+delta);
   if(next===0){delete window.COL[key];}else if(next===1){window.COL[key]='tengo';}else{window.COL[key]=next;}
@@ -834,7 +837,7 @@ function buildCard(c){
   div.innerHTML=`<div class="ch" onclick="tC('${c.code}')"><span class="cf2">${c.flag}</span><span class="cn2">${c.name}</span><div class="cbw"><div class="cbl" id="L-${c.code}">${done}/20${done===20?' ✅':''}</div><div class="cbb2"><div class="cbf2${done===20?' full':''}" id="B-${c.code}" style="width:${pct}%"></div></div></div><span class="ccr" id="CV-${c.code}">▾</span></div><div class="sw2" id="SW-${c.code}" style="display:none"></div><div class="ca2" id="CA-${c.code}" style="display:none"><button class="cat" onclick="mAll('${c.code}','tengo')">✓ Marcar todas</button><button class="cat" onclick="mAll('${c.code}','f')">✗ Desmarcar</button></div>`;
   return div;
 }
-function tC(code){
+window.tC = function(code){
   const sw=document.getElementById('SW-'+code),ca=document.getElementById('CA-'+code),cv=document.getElementById('CV-'+code);
   if(!sw)return;
   const open=sw.style.display!=='none';
@@ -858,7 +861,7 @@ function buildRows(code,sw){
   });
 }
 function refreshAllRows(code){const c=COUNTRIES.find(x=>x.code===code);if(!c)return;c.s.forEach(s=>refreshRow(code+'_'+s.n));}
-function mAll(code,state){
+window.mAll = function(code,state){
   const c=COUNTRIES.find(x=>x.code===code);if(!c)return;
   c.s.forEach(s=>{if(state==='f'){delete window.COL[code+'_'+s.n];}else{window.COL[code+'_'+s.n]='tengo';}});
   window.scheduleSave&&window.scheduleSave();window.uS();
@@ -897,12 +900,12 @@ function mkTile(k,num,nm,iF,iC){
   };
   return d;
 }
-function tSp(gId,cId){
+window.tSp = function(gId,cId){
   const g=document.getElementById(gId),c=document.getElementById(cId);
   if(g.style.display==='none'){g.style.display='grid';c.textContent='▴';}else{g.style.display='none';c.textContent='▾';}
 }
-function oS(){document.getElementById('modal-sobre').style.display='flex';setTimeout(()=>document.getElementById('si').focus(),100);}
-function cS(){document.getElementById('modal-sobre').style.display='none';document.getElementById('si').value='';document.getElementById('sp').textContent='';}
+window.oS = function(){document.getElementById('modal-sobre').style.display='flex';setTimeout(()=>document.getElementById('si').focus(),100);}
+window.cS = function(){document.getElementById('modal-sobre').style.display='none';document.getElementById('si').value='';document.getElementById('sp').textContent='';}
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('si').addEventListener('input',function(){
     const codes=this.value.trim().toUpperCase().replace(/,/g,' ').split(/\s+/).filter(Boolean);
@@ -925,7 +928,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const fg=document.getElementById('fg');FWC.forEach(s=>fg.appendChild(mkTile('FWC_'+s.c,s.c,s.n,true,false)));
   const cg=document.getElementById('cg');COCA.forEach(s=>cg.appendChild(mkTile('CC_'+s.c,s.c,s.n,false,true)));
 });
-function pS(){
+window.pS = function(){
   const codes=document.getElementById('si').value.trim().toUpperCase().replace(/,/g,' ').split(/\s+/).filter(Boolean);
   let m=0;
   codes.forEach(c=>{
@@ -939,7 +942,7 @@ function pS(){
   window.scheduleSave&&window.scheduleSave();window.uS();window.rebuildAll();cS();
   showToast('✓ '+m+' figurita'+(m!==1?'s':'')+' marcada'+(m!==1?'s':''));
 }
-function sWA(){
+window.sWA = function(){
   let msg='⚽ *Álbum Panini Mundial 2026*\n🔴 Me faltan:\n\n';let cnt=0;
   COUNTRIES.forEach(c=>{const fl=c.s.filter(s=>!isT(gs(c.code+'_'+s.n))).map(s=>c.code+s.n);if(fl.length>0&&fl.length<20){msg+=c.flag+' '+c.name+': '+fl.join(' ')+'\n';cnt+=fl.length;}});
   let dm='\n🔵 *Para canjear:*\n';let hd=false;
@@ -950,7 +953,7 @@ function sWA(){
 }
 
 /* ═══ TABS ═══ */
-function switchTab(tab,btn){
+window.switchTab = function(tab,btn){
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   ['album','fixture','groups','prode'].forEach(t=>document.getElementById('tab-'+t).style.display=t===tab?'block':'none');
@@ -961,13 +964,13 @@ function switchTab(tab,btn){
 
 /* ═══ FIXTURE ═══ */
 let currentPhase='grupos';
-function showPhase(phase,btn){
+window.showPhase = function(phase,btn){
   currentPhase=phase;
   document.querySelectorAll('.pb2').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderFixtureActive();
 }
-function renderFixtureActive(){
+window.renderFixtureActive = function(){
   const cont=document.getElementById('fc2');if(!cont)return;
   const days=FIXTURE[currentPhase]||[];
   cont.innerHTML='';
@@ -1024,7 +1027,7 @@ function renderFixtureActive(){
   });
 }
 
-function saveProdeMatch(id,side,val){
+window.saveProdeMatch = function(id,side,val){
   if(!window.PRODE)window.PRODE={};
   if(!window.PRODE[id])window.PRODE[id]={};
   window.PRODE[id][side]=parseInt(val)||0;
@@ -1041,7 +1044,7 @@ function calcProdePoints(id,res,pd){
   if(predSign===realSign)return 1;
   return 0;
 }
-function computeProdeScores(){
+window.computeProdeScores = function(){
   let total=0;
   const allMatches=[];
   Object.values(FIXTURE).forEach(days=>days.forEach(d=>d.matches.forEach(m=>allMatches.push(m))));
@@ -1119,7 +1122,7 @@ window.renderGroupsActive=function(){
 };
 
 /* ═══ PRODE TAB ═══ */
-function renderProdeTab(){
+window.renderProdeTab = function(){
   computeProdeScores();
   const block=document.getElementById('prode-friends-block');
   if(!block)return;
@@ -1129,7 +1132,7 @@ function renderProdeTab(){
     block.appendChild(h);
   }
 }
-function inviteFriend(){
+window.inviteFriend = function(){
   const email=document.getElementById('invite-email').value.trim();
   if(!email)return showToast('Ingresá un email válido');
   window.sendProdeInvite&&window.sendProdeInvite(email);
@@ -1138,6 +1141,7 @@ function inviteFriend(){
 
 // Init
 window.RESULTS={};window.PRODE={};
+
 </script>
 </body>
 </html>
